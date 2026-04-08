@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="pageTitle">Instant Transfert - Global</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Slideshow Background (Full Screen) -->
+    <div id="bgSlideshow" class="bg-slideshow"></div>
+    <div class="glass-overlay"></div>
+    
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+
+    <nav class="navbar">
+        <div class="logo">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="logo-icon"><path d="M5 3v4M19 17v4M5 21l14-18M19 3v4M5 17v4"/></svg>
+            <span>Instant Transfert</span>
+        </div>
+        <div class="nav-actions">
+            <!-- Bouton Utilisateur -->
+            <button id="userBtn" class="user-btn" aria-label="Compte Utilisateur">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <span data-i18n="navUser" class="nav-user-txt">Connexion</span>
+            </button>
+            
+            <div class="lang-selector">
+                <select id="languageSelect" class="lang-select">
+                    <option value="fr">🇫🇷 FR</option>
+                    <option value="en">🇬🇧 EN</option>
+                    <option value="es">🇪🇸 ES</option>
+                </select>
+            </div>
+            <button id="themeToggle" class="theme-toggle" aria-label="Toggle Theme">
+                <svg id="icon-sun" class="icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                <svg id="icon-moon" class="icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            </button>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="hero-section">
+            <div class="badge" data-i18n="heroBadge">🌍 Transferts Internationaux</div>
+            <h1 data-i18n="heroTitle">Envoyez de l'argent vers<br> <span class="grt-text">vos proches,<br>où qu'ils soient.</span></h1>
+            <p data-i18n="heroDesc">Envoyez et recevez facilement dans le monde entier. Rapide, sécurisé et très accessible.</p>
+            
+            <div class="loyalty-box mt-3" style="background: rgba(16, 185, 129, 0.1); border: 1px solid #10b981; padding: 16px; border-radius: var(--border-radius-sm); color: var(--text-main);">
+                <div style="display:flex; align-items:center; gap: 10px;">
+                    <span style="font-size: 1.5rem;">🎁</span>
+                    <div>
+                        <strong style="color: #10b981;" data-i18n="loyaltyTitle">Programme de fidélité</strong>
+                        <div data-i18n="loyaltyDesc" style="font-size: 0.9rem;">Frais bloqués à 1% — Et le 5ème de vos transferts est 100% sans frais !</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="feature-pills">
+                <span data-i18n="feat1">⚡ Transfert instantané</span>
+                <span data-i18n="feat2">🔒 100% Sécurisé</span>
+                <span data-i18n="feat3">💸 Frais 1.00%</span>
+            </div>
+        </div>
+
+        <div class="widget-section">
+            <div class="glass-card widget-card">
+                
+                <!-- STEP 1: MONTANT -->
+                <div class="step-content active" id="step1">
+                    <div class="step-header">
+                        <h3 data-i18n="step1Title">Simuler l'envoi</h3>
+                        <div class="step-indicator" data-i18n="step1Ind">Étape 1/3</div>
+                    </div>
+                    
+                    <div class="countries-dual">
+                        <!-- Origin Country -->
+                        <div class="input-group custom-dropdown" id="originDropdownContainer">
+                            <label data-i18n="originCountry">Pays d'envoi</label>
+                            <div class="dropdown-header" id="originDropdownHeader">
+                                <span id="originSelectedText">Chargement... 🌍</span>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                            </div>
+                            <div class="dropdown-body" id="originDropdownBody">
+                                <input type="text" id="originSearch" placeholder="..." class="search-input" autocomplete="off">
+                                <div class="dropdown-list" id="originList"></div>
+                            </div>
+                        </div>
+
+                        <!-- Destination Country -->
+                        <div class="input-group custom-dropdown" id="destDropdownContainer">
+                            <label data-i18n="destCountry">Pays de destination</label>
+                            <div class="dropdown-header" id="destDropdownHeader">
+                                <span id="destSelectedText">Chargement... 🌍</span>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                            </div>
+                            <div class="dropdown-body" id="destDropdownBody">
+                                <input type="text" id="destSearch" placeholder="..." class="search-input" autocomplete="off">
+                                <div class="dropdown-list" id="destList"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label data-i18n="youSend">Vous envoyez</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="sendAmount" value="100" min="1">
+                            <div class="currency-tag"><span id="currencyOriginTag">...</span></div>
+                        </div>
+                    </div>
+
+                    <div class="breakdown">
+                        <div class="breakdown-row">
+                            <span class="muted" data-i18n="exchRateLbl">Taux de change</span>
+                            <span>1 <span id="rateCurr1">...</span> = <span id="exchangeRateTxt">...</span> <span id="rateCurr2">...</span></span>
+                        </div>
+                        <div class="breakdown-row">
+                            <span class="muted" data-i18n="transferFeeLbl">Frais de transfert (1%)</span>
+                            <span><span id="feeTxt">1.00</span> <span id="feeCurr">...</span></span>
+                        </div>
+                        <div class="breakdown-row total-row">
+                            <span data-i18n="totalPayLbl">Total à payer</span>
+                            <span class="total-cad"><span id="totalPay">101.00</span> <span id="totalCurr">...</span></span>
+                        </div>
+                        <!-- Loyalty simulation text -->
+                        <div class="breakdown-row" style="color:var(--success-color); font-size:0.8rem; border-top:1px dashed var(--success-color); padding-top:8px; margin-top:-4px;" id="loyaltyStatus">
+                            <span data-i18n="loyaltyStatus">Vous en êtes à 4/5 envois. Encore un et le prochain est gratuit !</span>
+                        </div>
+                    </div>
+
+                    <div class="input-group receive-group">
+                        <label data-i18n="recipientReceives">Le destinataire reçoit</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="receiveAmount" value="..." readonly>
+                            <div class="currency-tag receive-tag"><span id="currencyDestTag">...</span></div>
+                        </div>
+                    </div>
+
+                    <button class="btn-primary" onclick="nextStep(2)" data-i18n="btnStart">Commencer l'envoi</button>
+                    <!-- Error missing rates -->
+                    <div id="rateErrorMsg" style="color: #ef4444; font-size:0.85rem; display:none;" data-i18n="rateError">Avertissement : Les taux entre ces devises sont introuvables.</div>
+                </div>
+
+                <!-- STEP 2: DESTINATAIRE -->
+                <div class="step-content" id="step2">
+                    <div class="step-header">
+                        <h3 data-i18n="step2Title">Destinataire</h3>
+                        <div class="step-indicator" data-i18n="step2Ind">Étape 2/3</div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label data-i18n="receiveMethodLbl">Méthode de réception locale</label>
+                        <select id="walletType" class="select-input"></select>
+                    </div>
+
+                    <div class="input-group">
+                        <label data-i18n="phoneLbl">Numéro de téléphone ou compte</label>
+                        <div class="input-wrapper">
+                            <div class="prefix" id="dialPrefix">+xxx</div>
+                            <input type="tel" id="recipientPhone" placeholder="...">
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label data-i18n="nameLbl">Nom complet du bénéficiaire</label>
+                        <input type="text" class="standard-input" id="recipientName" placeholder="...">
+                    </div>
+
+                    <div class="btn-group">
+                        <button class="btn-secondary" onclick="nextStep(1)" data-i18n="btnBack">Retour</button>
+                        <button class="btn-primary" onclick="nextStep(3)" data-i18n="btnContinue">Continuer</button>
+                    </div>
+                </div>
+
+                <!-- STEP 3: PAIEMENT -->
+                <div class="step-content" id="step3">
+                    <div class="step-header">
+                        <h3 data-i18n="step3Title">Paiement</h3>
+                        <div class="step-indicator" data-i18n="step3Ind">Étape 3/3</div>
+                    </div>
+
+                    <div class="recap-box">
+                        <p><span data-i18n="sendingWord">Envoi de</span> <strong><span id="recapReceive">...</span> <span id="recapCurr">...</span></strong> <span data-i18n="toWord">à</span> <strong id="recapName">...</strong></p>
+                    </div>
+
+                    <div class="input-group">
+                        <label data-i18n="payMethodLbl">Méthode de paiement locale</label>
+                        <div class="payment-options">
+                            <label class="payment-option">
+                                <input type="radio" name="payMethod" value="bank" checked>
+                                <div class="option-content">
+                                    <span class="icon">🏦</span>
+                                    <span data-i18n="payBank">Virement Bancaire</span>
+                                </div>
+                            </label>
+                            <label class="payment-option">
+                                <input type="radio" name="payMethod" value="card">
+                                <div class="option-content">
+                                    <span class="icon">💳</span>
+                                    <span data-i18n="payCard">Carte Banquaire</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="btn-group">
+                        <button class="btn-secondary" onclick="nextStep(2)" data-i18n="btnBack">Retour</button>
+                        <button class="btn-primary btn-pay" onclick="processPayment()">
+                            <span data-i18n="btnPay">Payer</span> <span id="finalPay">...</span> <span id="finalCurr">...</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- STEP 4: SUCCESS -->
+                <div class="step-content success-step" id="step4">
+                    <div class="success-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    </div>
+                    <h3 class="grt-text" data-i18n="successTitle">Transfert réussi !</h3>
+                    <p>
+                        <span data-i18n="successP1">Vos</span> <strong><span id="successSent">...</span> <span id="sucOrigCurr">...</span></strong> <span data-i18n="successP2">ont été convertis. Le destinataire a reçu instantanément</span> <strong><span id="successRec">...</span> <span id="sucDestCurr">...</span></strong> <span data-i18n="successP3">sur son compte.</span>
+                    </p>
+                    
+                    <div id="culturalFactBox" class="culture-box mt-3" style="display:none;">
+                        <h4 style="margin-bottom: 8px;">💡 Le saviez-vous ?</h4>
+                        <p id="culturalFactText" style="font-size: 0.95rem; line-height: 1.4; color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">...</p>
+                    </div>
+
+                    <button class="btn-secondary mt-3" onclick="nextStep(1)" data-i18n="btnNew">Faire un autre transfert</button>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Historique des transactions -->
+    <section class="dashboard-preview" id="historySection" style="display:none; position:relative; z-index:2;">
+        <div class="glass-card">
+            <div class="dashboard-header">
+                <h3 data-i18n="historyTitle">Historique Récent</h3>
+            </div>
+            <div class="transactions-list" id="transactionsList">
+                <!-- JavaScript injected here -->
+            </div>
+        </div>
+    </section>
+    
+    <!-- User Modal Overlay -->
+    <div class="modal-overlay" id="userModal">
+        <div class="glass-card modal-content">
+            <button class="close-modal" id="closeUserModal">✕</button>
+            <h2 data-i18n="modalTitle" style="text-align:center; margin-bottom: 8px;">Rejoignez-nous</h2>
+            <p data-i18n="modalDesc" style="text-align:center; margin-bottom: 24px;">Créez votre compte en quelques secondes.</p>
+            
+            <button class="social-btn google-btn">
+                <svg viewBox="0 0 24 24" width="20" height="20"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                <span data-i18n="authGoogle">Continuer avec Google</span>
+            </button>
+            <div style="margin-top: 12px;"></div>
+            <button class="social-btn apple-btn">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M17.05 20.28c-.98.05-2.26-.53-3.05-.53-.87 0-2.3.62-3.14.62-1.3-.05-2.58-.69-3.32-1.78-1.54-2.14-2.69-5.96-1.12-8.58C7.19 8.7 8.5 7.84 9.9 7.84c1.23-.05 2.29.69 3.06.69.75 0 2.06-.82 3.44-.69 1.48.05 2.59.54 3.25 1.44-2.91 1.63-2.4 5.6.53 6.74-.7 1.77-1.63 3.53-3.13 4.26ZM15.03 4.67c.69-.87 1.14-2.06 1.02-3.26-1.16.05-2.4.78-3.12 1.67-.62.77-1.18 1.99-1.02 3.2 1.25.11 2.45-.73 3.12-1.61Z"/></svg>
+                <span data-i18n="authApple">Continuer avec Apple</span>
+            </button>
+            
+            <div class="divider">
+                <span data-i18n="authOr">ou via email</span>
+            </div>
+            
+            <div class="input-group">
+                <input type="email" class="standard-input" placeholder="Email...">
+            </div>
+            <button class="btn-primary mt-3" data-i18n="authSignBtn">Créer le compte</button>
+        </div>
+    </div>
+
+    <script src="app.js?v=4"></script>
+</body>
+</html>
