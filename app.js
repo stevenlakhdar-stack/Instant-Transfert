@@ -58,7 +58,16 @@ const translations = {
         modeRequest: "Demander",
         errorStep2: "Veuillez remplir correctement ces informations.",
         shareLink: "Partager le lien",
-        requestSent: "Demande envoyée !"
+        requestSent: "Demande envoyée !",
+        favTitle: "Contacts favoris",
+        btnReceipt: "Télécharger le reçu",
+        referTitle: "Offrez 10 CAD, recevez 10 CAD",
+        referDesc: "Invitez vos amis et recevez un bonus dès leur premier transfert.",
+        btnCopy: "Copier",
+        mapTitle: "Sélectionnez votre destination",
+        mapHint: "Cliquez sur un pays pour le choisir comme destination.",
+        notifSent: "Transfert vers {name} initié.",
+        notifRequest: "{name} vous a envoyé une demande de paiement."
     },
     en: {
         pageTitle: "Instant Transfer - Global",
@@ -116,7 +125,16 @@ const translations = {
         modeRequest: "Request",
         errorStep2: "Please fill in these details correctly.",
         shareLink: "Share link",
-        requestSent: "Request sent!"
+        requestSent: "Request sent!",
+        favTitle: "Favorite contacts",
+        btnReceipt: "Download receipt",
+        referTitle: "Give 10 CAD, get 10 CAD",
+        referDesc: "Invite your friends and get a bonus on their first transfer.",
+        btnCopy: "Copy",
+        mapTitle: "Select your destination",
+        mapHint: "Click on a country to choose it as a destination.",
+        notifSent: "Transfer to {name} initiated.",
+        notifRequest: "{name} sent you a payment request."
     },
     es: {
         pageTitle: "Transferencia Instantánea - Global",
@@ -228,6 +246,8 @@ let currentDestCca2 = "SN";
 let isRateAvailable = true;
 let currentAppMode = "send"; // "send" or "request"
 let rateChart = null;
+let savedContacts = JSON.parse(localStorage.getItem('instant_contacts') || '[]');
+let notifications = [];
 
 const customOperators = {
     "SN": [{val: "wave", label: "Wave 🌊"}, {val: "orange", label: "Orange 🟠"}, {val: "free", label: "Free 🔴"}],
@@ -291,6 +311,8 @@ async function initGlobalData() {
         selectCountry('dest', "SN");
 
         updateLanguage();
+        renderFavList();
+        initMockNotifications();
         
     } catch (error) {
         console.error("Erreur API:", error);
@@ -585,6 +607,9 @@ async function nextStep(stepNumber) {
 
         const name = nameInput.value.trim();
         document.getElementById('recapName').textContent = name;
+        
+        // Suggest adding to favs if not already there
+        // (Logic handled in processPayment)
     }
     
     if (stepNumber === 4) {
@@ -643,12 +668,185 @@ function processPayment() {
         
         const type = currentAppMode === 'send' ? 'send' : 'request';
         addTransactionToHistory(currentDestCca2, finalAmnt, curOrig, recipientNameTxt, type);
+        saveContact(recipientNameTxt, document.getElementById('recipientPhone').value.trim(), currentDestCca2);
 
         document.getElementById('recipientName').value = '';
         document.getElementById('recipientPhone').value = '';
 
         nextStep(4);
+        showToast(translations[currentLang].notifSent.replace('{name}', recipientNameTxt));
     }, 1500);
+}
+
+// --- FAVOURITE CONTACTS ---
+function saveContact(name, phone, cca2) {
+    if (savedContacts.find(c => c.phone === phone)) return;
+    savedContacts.unshift({ name, phone, cca2 });
+    if (savedContacts.length > 5) savedContacts.pop();
+    localStorage.setItem('instant_contacts', JSON.stringify(savedContacts));
+    renderFavList();
+}
+
+function renderFavList() {
+    const container = document.getElementById('favContactsContainer');
+    const list = document.getElementById('favList');
+    if (!container || !list) return;
+
+    if (savedContacts.length === 0) {
+        container.style.display = 'none';
+        return;
+    }
+
+    container.style.display = 'block';
+    list.innerHTML = "";
+    savedContacts.forEach(c => {
+        const country = globalCountriesData[c.cca2];
+        const initial = c.name.charAt(0).toUpperCase();
+        const div = document.createElement('div');
+        div.className = 'fav-item';
+        div.innerHTML = `
+            <div class="fav-avatar">${initial}</div>
+            <div class="fav-name">${c.name.split(' ')[0]}</div>
+        `;
+        div.onclick = () => {
+            document.getElementById('recipientName').value = c.name;
+            document.getElementById('recipientPhone').value = c.phone;
+            selectCountry('dest', c.cca2);
+        };
+        list.appendChild(div);
+    });
+}
+
+// --- RECEIPT PDF GENERATION ---
+function generateReceiptPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    const TRX_ID = "TRX-" + Math.random().toString(36).substr(2, 6).toUpperCase();
+    const date = new Date().toLocaleString();
+    const dest = globalCountriesData[currentDestCca2];
+    const amountOrig = document.getElementById('sendAmount').value;
+    const amountDest = document.getElementById('recapReceive').textContent;
+    const fee = document.getElementById('feeTxt').textContent;
+
+    // Header
+    doc.setFillColor(236, 72, 153);
+    doc.rect(0, 0, 210, 40, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(22);
+    doc.text("INSTANT TRANSFERT", 105, 25, { align: "center" });
+
+    // Body
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(14);
+    doc.text("RECU DE TRANSACTION OFFICIEL", 20, 60);
+    doc.setFontSize(10);
+    doc.text(`ID Transaction: ${TRX_ID}`, 20, 70);
+    doc.text(`Date: ${date}`, 20, 75);
+
+    doc.line(20, 85, 190, 85);
+
+    doc.setFontSize(12);
+    doc.text("Détails du transfert:", 20, 100);
+    doc.text(`Expéditeur: Client Instant`, 30, 110);
+    doc.text(`Bénéficiaire: ${document.getElementById('recapName').textContent}`, 30, 117);
+    doc.text(`Destination: ${getCountryName(dest)} ${dest.flag}`, 30, 124);
+
+    doc.line(20, 135, 190, 135);
+
+    doc.text("Montants:", 20, 150);
+    doc.text(`Montant envoyé: ${amountOrig} CAD`, 30, 160);
+    doc.text(`Frais (1%): ${fee} CAD`, 30, 167);
+    doc.text(`Le bénéficiaire reçoit: ${amountDest} ${dest.currency}`, 30, 174);
+
+    // QR Code Simulation
+    doc.setDrawColor(200, 200, 200);
+    doc.rect(150, 60, 30, 30);
+    doc.setFontSize(8);
+    doc.text("QR VERIF", 157, 77);
+
+    // Footer
+    doc.setFontSize(9);
+    doc.setTextColor(150, 150, 150);
+    doc.text("Ce document est un reçu numérique généré automatiquement.", 105, 280, { align: "center" });
+
+    doc.save(`Recu_${TRX_ID}.pdf`);
+}
+
+// --- MAP MODAL & LOGIC ---
+function openMapModal() {
+    document.getElementById('mapModal').classList.add('show');
+    renderMap();
+}
+document.getElementById('closeMapModal').onclick = () => document.getElementById('mapModal').classList.remove('show');
+
+function renderMap() {
+    const container = document.getElementById('mapContainer');
+    // Simplified SVG Map (Focus on world shapes)
+    container.innerHTML = `
+        <svg viewBox="0 0 1000 500" style="width:100%; height:100%;">
+            <!-- Mock continents/major countries -->
+            <path class="map-country" d="M150,100 L250,100 L250,200 L150,200 Z" data-cca2="CA" title="Canada"/>
+            <path class="map-country" d="M450,250 L500,250 L500,350 L450,400 Z" data-cca2="SN" title="Senegal"/>
+            <path class="map-country" d="M420,200 L480,200 L480,250 L420,250 Z" data-cca2="MA" title="Maroc"/>
+            <path class="map-country" d="M200,250 L300,250 L300,350 L200,350 Z" data-cca2="BR" title="Bresil"/>
+            <path class="map-country" d="M700,150 L850,150 L850,300 L700,300 Z" data-cca2="CN" title="Chine"/>
+            <path class="map-country" d="M500,100 L600,100 L600,180 L500,180 Z" data-cca2="FR" title="France"/>
+            <text x="200" y="155" fill="white" font-size="20" style="pointer-events:none;">CA</text>
+            <text x="470" y="330" fill="white" font-size="20" style="pointer-events:none;">SN</text>
+            <text x="445" y="230" fill="white" font-size="15" style="pointer-events:none;">MA</text>
+            <text x="540" y="145" fill="white" font-size="20" style="pointer-events:none;">FR</text>
+        </svg>
+    `;
+    container.querySelectorAll('.map-country').forEach(path => {
+        path.onclick = () => {
+            const cca2 = path.getAttribute('data-cca2');
+            selectCountry('dest', cca2);
+            document.getElementById('mapModal').classList.remove('show');
+            showToast(`Destination: ${getCountryName(globalCountriesData[cca2])}`);
+        };
+    });
+}
+
+// --- NOTIFICATIONS & TOASTS ---
+function initMockNotifications() {
+    setInterval(() => {
+        if (Math.random() > 0.8) {
+            const names = ["Marie", "Alpha", "Karim", "Sophie", "Jean"];
+            const name = names[Math.floor(Math.random() * names.length)];
+            const msg = translations[currentLang].notifRequest.replace('{name}', name);
+            showNotification(msg);
+        }
+    }, 15000);
+}
+
+function showNotification(msg) {
+    const badge = document.getElementById('notifBadge');
+    badge.style.display = 'block';
+    showToast(msg);
+}
+
+document.getElementById('notifBtn').onclick = () => {
+    document.getElementById('notifBadge').style.display = 'none';
+};
+
+function showToast(msg) {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.textContent = msg;
+    container.appendChild(toast);
+    setTimeout(() => toast.classList.add('show'), 10);
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 400);
+    }, 4000);
+}
+
+// --- REFERRAL LOGIC ---
+function copyReferralCode() {
+    const code = document.getElementById('promoCode').textContent;
+    navigator.clipboard.writeText(code);
+    showToast(currentLang === 'fr' ? "Code copié !" : "Code copied!");
 }
 
 const style = document.createElement('style');
