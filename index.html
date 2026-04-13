@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <!-- Slideshow Background (Full Screen) -->
@@ -71,8 +72,13 @@
                 
                 <!-- STEP 1: MONTANT -->
                 <div class="step-content active" id="step1">
-                    <div class="step-header">
-                        <h3 data-i18n="step1Title">Simuler l'envoi</h3>
+                    <div class="mode-toggle">
+                        <button class="mode-btn active" id="modeSend" onclick="switchMode('send')" data-i18n="modeSend">Envoyer</button>
+                        <button class="mode-btn" id="modeRequest" onclick="switchMode('request')" data-i18n="modeRequest">Demander</button>
+                    </div>
+
+                    <div class="step-header" style="margin-top: 16px;">
+                        <h3 id="step1TitleEl" data-i18n="step1Title">Simuler l'envoi</h3>
                         <div class="step-indicator" data-i18n="step1Ind">Étape 1/3</div>
                     </div>
                     
@@ -113,9 +119,14 @@
                     </div>
 
                     <div class="breakdown">
-                        <div class="breakdown-row">
-                            <span class="muted" data-i18n="exchRateLbl">Taux de change</span>
-                            <span>1 <span id="rateCurr1">...</span> = <span id="exchangeRateTxt">...</span> <span id="rateCurr2">...</span></span>
+                        <div class="breakdown-row" style="flex-direction: column; align-items: stretch;">
+                            <div style="display:flex; justify-content: space-between;">
+                                <span class="muted" data-i18n="exchRateLbl">Taux de change</span>
+                                <span>1 <span id="rateCurr1">...</span> = <span id="exchangeRateTxt">...</span> <span id="rateCurr2">...</span></span>
+                            </div>
+                            <div class="chart-container" style="position: relative; height:50px; width:100%; margin-top:8px;">
+                                <canvas id="rateChart"></canvas>
+                            </div>
                         </div>
                         <div class="breakdown-row">
                             <span class="muted" data-i18n="transferFeeLbl">Frais de transfert (1%)</span>
@@ -151,8 +162,10 @@
                         <div class="step-indicator" data-i18n="step2Ind">Étape 2/3</div>
                     </div>
                     
+                    <div id="errorMsgStep2" style="color: #ef4444; font-size:0.85rem; display:none; margin-bottom:12px;" data-i18n="errorStep2">Veuillez remplir correctement ces informations.</div>
+
                     <div class="input-group">
-                        <label data-i18n="receiveMethodLbl">Méthode de réception locale</label>
+                        <label id="receiveMethodLblEl" data-i18n="receiveMethodLbl">Méthode de réception locale</label>
                         <select id="walletType" class="select-input"></select>
                     </div>
 
@@ -276,6 +289,6 @@
         </div>
     </div>
 
-    <script src="app.js?v=4"></script>
+    <script src="app.js?v=5"></script>
 </body>
 </html>

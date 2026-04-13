@@ -693,6 +693,51 @@ p {
     .blob-2 { width: 300px; height: 300px; }
 }
 
+/* Mode Toggle */
+.mode-toggle {
+    display: flex;
+    background: var(--secondary-bg);
+    padding: 4px;
+    border-radius: var(--border-radius-sm);
+    gap: 4px;
+}
+.mode-btn {
+    flex: 1;
+    padding: 8px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: calc(var(--border-radius-sm) - 2px);
+    transition: var(--transition);
+}
+.mode-btn.active {
+    background: var(--primary-color);
+    color: white;
+    box-shadow: 0 4px 12px rgba(236, 72, 153, 0.3);
+}
+
+/* Chart Container */
+.chart-container {
+    opacity: 0.8;
+}
+
+/* Validation Errors */
+.error-border {
+    border-color: #ef4444 !important;
+    background: rgba(239, 68, 68, 0.05) !important;
+}
+.error-shake {
+    animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
+@keyframes shake {
+  10%, 90% { transform: translate3d(-1px, 0, 0); }
+  20%, 80% { transform: translate3d(2px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+  40%, 60% { transform: translate3d(4px, 0, 0); }
+}
+
 /* ---- USER MODAL & NAVBAR PROFIL ---- */
 .user-btn {
     display: flex;

@@ -53,7 +53,12 @@ const translations = {
         authGoogle: "Continuer avec Google",
         authApple: "Continuer avec Apple",
         authOr: "ou via email",
-        authSignBtn: "Créer le compte"
+        authSignBtn: "Créer le compte",
+        modeSend: "Envoyer",
+        modeRequest: "Demander",
+        errorStep2: "Veuillez remplir correctement ces informations.",
+        shareLink: "Partager le lien",
+        requestSent: "Demande envoyée !"
     },
     en: {
         pageTitle: "Instant Transfer - Global",
@@ -106,7 +111,12 @@ const translations = {
         authGoogle: "Continue with Google",
         authApple: "Continue with Apple",
         authOr: "or via email",
-        authSignBtn: "Create account"
+        authSignBtn: "Create account",
+        modeSend: "Send",
+        modeRequest: "Request",
+        errorStep2: "Please fill in these details correctly.",
+        shareLink: "Share link",
+        requestSent: "Request sent!"
     },
     es: {
         pageTitle: "Transferencia Instantánea - Global",
@@ -159,7 +169,12 @@ const translations = {
         authGoogle: "Continuar con Google",
         authApple: "Continuar con Apple",
         authOr: "o por correo",
-        authSignBtn: "Crear cuenta"
+        authSignBtn: "Crear cuenta",
+        modeSend: "Enviar",
+        modeRequest: "Solicitar",
+        errorStep2: "Por favor, complete estos detalles correctamente.",
+        shareLink: "Compartir enlace",
+        requestSent: "¡Solicitud enviada!"
     }
 };
 
@@ -211,6 +226,8 @@ let originRates = {};
 let currentOriginCca2 = "CA";
 let currentDestCca2 = "SN";
 let isRateAvailable = true;
+let currentAppMode = "send"; // "send" or "request"
+let rateChart = null;
 
 const customOperators = {
     "SN": [{val: "wave", label: "Wave 🌊"}, {val: "orange", label: "Orange 🟠"}, {val: "free", label: "Free 🔴"}],
@@ -295,6 +312,76 @@ async function fetchRatesForOrigin(currencyCode) {
         document.getElementById('rateErrorMsg').style.display = "block";
     }
     updateConversion();
+    updateChart();
+}
+
+function switchMode(mode) {
+    currentAppMode = mode;
+    document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(mode === 'send' ? 'modeSend' : 'modeRequest').classList.add('active');
+    
+    // UI Updates
+    const d = translations[currentLang];
+    document.getElementById('step1TitleEl').textContent = mode === 'send' ? d.step1Title : d.modeRequest;
+    document.getElementById('receiveMethodLblEl').textContent = mode === 'send' ? d.receiveMethodLbl : (currentLang === 'fr' ? "Méthode de paiement du tiers" : "Third-party payment method");
+    
+    const payBtn = document.querySelector('.btn-pay');
+    if (payBtn) {
+        payBtn.innerHTML = mode === 'send' ? `<span data-i18n="btnPay">${d.btnPay}</span> <span id="finalPay">...</span> <span id="finalCurr">...</span>` : `<span data-i18n="shareLink">${d.shareLink}</span>`;
+    }
+
+    updateConversion();
+}
+
+function initChart() {
+    const ctx = document.getElementById('rateChart').getContext('2d');
+    const gradient = ctx.createLinearGradient(0, 0, 0, 50);
+    gradient.addColorStop(0, 'rgba(236, 72, 153, 0.4)');
+    gradient.addColorStop(1, 'rgba(236, 72, 153, 0)');
+
+    rateChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['', '', '', '', '', '', ''],
+            datasets: [{
+                data: [0, 0, 0, 0, 0, 0, 0],
+                borderColor: '#ec4899',
+                borderWidth: 2,
+                fill: true,
+                backgroundColor: gradient,
+                tension: 0.4,
+                pointRadius: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false }, tooltip: { enabled: false } },
+            scales: { x: { display: false }, y: { display: false } }
+        }
+    });
+}
+
+function updateChart() {
+    if (!rateChart) return;
+    const destCountry = globalCountriesData[currentDestCca2];
+    if (!destCountry) return;
+    
+    let rate = 1;
+    if (isRateAvailable && originRates[destCountry.currency]) {
+        rate = originRates[destCountry.currency];
+    }
+
+    // Simulate 7 days history
+    const baseRate = rate;
+    const data = [];
+    for (let i = 0; i < 7; i++) {
+        data.push(baseRate * (0.98 + Math.random() * 0.04));
+    }
+    data[6] = rate; // Today is actual rate
+
+    rateChart.data.datasets[0].data = data;
+    rateChart.update();
 }
 
 // --- DOM ELEMENTS (DROPDOWNS) ---
@@ -471,8 +558,32 @@ async function fetchWikiFact(countryName) {
 }
 
 async function nextStep(stepNumber) {
+    if (stepNumber === 2) {
+        // Simple Reset errors
+        document.getElementById('errorMsgStep2').style.display = 'none';
+        document.querySelectorAll('.standard-input').forEach(i => i.classList.remove('error-border', 'error-shake'));
+    }
+
     if (stepNumber === 3) {
-        const name = document.getElementById('recipientName').value.trim() || '...';
+        const nameInput = document.getElementById('recipientName');
+        const phoneInput = document.getElementById('recipientPhone');
+        
+        let isValid = true;
+        if (!nameInput.value.trim()) {
+            nameInput.classList.add('error-border', 'error-shake');
+            isValid = false;
+        }
+        if (!phoneInput.value.trim() || phoneInput.value.length < 5) {
+            phoneInput.classList.add('error-border', 'error-shake');
+            isValid = false;
+        }
+
+        if (!isValid) {
+            document.getElementById('errorMsgStep2').style.display = 'block';
+            return;
+        }
+
+        const name = nameInput.value.trim();
         document.getElementById('recapName').textContent = name;
     }
     
@@ -500,6 +611,15 @@ async function nextStep(stepNumber) {
         }).catch(() => {
             textEl.textContent = "L'argent voyage plus vite que jamais, rapprochant les cultures et les familles à travers la planète.";
         });
+
+        // Update success text for Request mode
+        if (currentAppMode === 'request') {
+            document.querySelector('.grt-text[data-i18n="successTitle"]').textContent = translations[currentLang].requestSent;
+            document.getElementById('culturalFactBox').previousElementSibling.style.display = 'none';
+        } else {
+            document.querySelector('.grt-text[data-i18n="successTitle"]').textContent = translations[currentLang].successTitle;
+            document.getElementById('culturalFactBox').previousElementSibling.style.display = 'block';
+        }
     }
     
     document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
@@ -521,7 +641,8 @@ function processPayment() {
         const finalAmnt = document.getElementById('totalPay').textContent;
         const curOrig = document.getElementById('totalCurr').textContent;
         
-        addTransactionToHistory(currentDestCca2, finalAmnt, curOrig, recipientNameTxt);
+        const type = currentAppMode === 'send' ? 'send' : 'request';
+        addTransactionToHistory(currentDestCca2, finalAmnt, curOrig, recipientNameTxt, type);
 
         document.getElementById('recipientName').value = '';
         document.getElementById('recipientPhone').value = '';
@@ -552,17 +673,22 @@ function changeBackground() {
 }
 setInterval(changeBackground, 6000);
 changeBackground();
+initChart();
 
 // --- TRANSACTION HISTORY ---
 const localHistory = [];
-function addTransactionToHistory(destCca2, amount, currency, recipientCodeName) {
+function addTransactionToHistory(destCca2, amount, currency, recipientCodeName, type = 'send') {
     const country = globalCountriesData[destCca2];
     const flag = country ? country.flag : "🌍";
-    const status = currentLang === 'fr' ? "Terminé" : (currentLang === 'en' ? "Completed" : "Completado");
+    
+    let status = currentLang === 'fr' ? "Terminé" : (currentLang === 'en' ? "Completed" : "Completado");
+    if (type === 'request') {
+        status = currentLang === 'fr' ? "Demande envoyée" : (currentLang === 'en' ? "Request sent" : "Solicitud enviada");
+    }
     
     localHistory.unshift({
         id: "TRX-" + Math.random().toString(36).substr(2, 6).toUpperCase(),
-        flag, recipientCodeName, amount, currency, status
+        flag, recipientCodeName, amount, currency, status, type
     });
     renderHistory();
 }
@@ -578,6 +704,8 @@ function renderHistory() {
     section.style.display = 'block';
     list.innerHTML = "";
     localHistory.slice(0, 5).forEach(tx => {
+        const symbol = tx.type === 'send' ? '-' : '+';
+        const color = tx.type === 'send' ? 'var(--text-main)' : '#10b981';
         list.innerHTML += `
             <div class="transaction-item" style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid var(--card-border); padding-bottom:16px; padding-top:10px;">
                 <div style="display:flex; align-items:center; gap: 12px;">
@@ -588,7 +716,7 @@ function renderHistory() {
                     </div>
                 </div>
                 <div style="text-align:right;">
-                    <div style="font-weight:bold; color:var(--text-main);">- ${tx.amount} ${tx.currency}</div>
+                    <div style="font-weight:bold; color:${color};">${symbol} ${tx.amount} ${tx.currency}</div>
                     <div style="color:#10b981; font-size:0.85rem; font-weight:600;">${tx.status}</div>
                 </div>
             </div>
