@@ -279,6 +279,8 @@ let currentDestCca2 = "SN";
 let isRateAvailable = true;
 let currentAppMode = "send"; // "send" or "request"
 let rateChart = null;
+let leafletMap = null;
+let geojsonLayer = null;
 let savedContacts = JSON.parse(localStorage.getItem('instant_contacts') || '[]');
 let notifications = [];
 
@@ -805,39 +807,98 @@ function generateReceiptPDF() {
     doc.save(`Recu_${TRX_ID}.pdf`);
 }
 
-// --- MAP MODAL & LOGIC ---
+// --- MAP MODAL & LOGIC (LEAFLET HD) ---
 function openMapModal() {
     document.getElementById('mapModal').classList.add('show');
-    renderMap();
+    if (!leafletMap) {
+        renderMap();
+    } else {
+        setTimeout(() => leafletMap.invalidateSize(), 300);
+    }
 }
 document.getElementById('closeMapModal').onclick = () => document.getElementById('mapModal').classList.remove('show');
 
-function renderMap() {
-    const container = document.getElementById('mapContainer');
-    // Simplified SVG Map (Focus on world shapes)
-    container.innerHTML = `
-        <svg viewBox="0 0 1000 500" style="width:100%; height:100%;">
-            <!-- Mock continents/major countries -->
-            <path class="map-country" d="M150,100 L250,100 L250,200 L150,200 Z" data-cca2="CA" title="Canada"/>
-            <path class="map-country" d="M450,250 L500,250 L500,350 L450,400 Z" data-cca2="SN" title="Senegal"/>
-            <path class="map-country" d="M420,200 L480,200 L480,250 L420,250 Z" data-cca2="MA" title="Maroc"/>
-            <path class="map-country" d="M200,250 L300,250 L300,350 L200,350 Z" data-cca2="BR" title="Bresil"/>
-            <path class="map-country" d="M700,150 L850,150 L850,300 L700,300 Z" data-cca2="CN" title="Chine"/>
-            <path class="map-country" d="M500,100 L600,100 L600,180 L500,180 Z" data-cca2="FR" title="France"/>
-            <text x="200" y="155" fill="white" font-size="20" style="pointer-events:none;">CA</text>
-            <text x="470" y="330" fill="white" font-size="20" style="pointer-events:none;">SN</text>
-            <text x="445" y="230" fill="white" font-size="15" style="pointer-events:none;">MA</text>
-            <text x="540" y="145" fill="white" font-size="20" style="pointer-events:none;">FR</text>
-        </svg>
-    `;
-    container.querySelectorAll('.map-country').forEach(path => {
-        path.onclick = () => {
-            const cca2 = path.getAttribute('data-cca2');
-            selectCountry('dest', cca2);
-            document.getElementById('mapModal').classList.remove('show');
-            showToast(`Destination: ${getCountryName(globalCountriesData[cca2])}`);
-        };
+async function renderMap() {
+    // Initialiser la carte sur le conteneur
+    leafletMap = L.map('mapContainer', {
+        center: [20, 0],
+        zoom: 2,
+        minZoom: 2,
+        maxBounds: [[-90, -180], [90, 180]]
     });
+
+    // Layer de fond (Sombre)
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OpenStreetMap &copy; CARTO'
+    }).addTo(leafletMap);
+
+    try {
+        // Charger les frontières mondiales (GeoJSON)
+        const response = await fetch('https://raw.githubusercontent.com/datasets/geo-boundaries-world-110m/master/countries.geojson');
+        const data = await response.json();
+
+        geojsonLayer = L.geoJson(data, {
+            style: function(feature) {
+                return {
+                    fillColor: '#333',
+                    weight: 1,
+                    opacity: 1,
+                    color: '#555',
+                    fillOpacity: 0.7
+                };
+            },
+            onEachFeature: function(feature, layer) {
+                layer.on({
+                    mouseover: (e) => {
+                        const l = e.target;
+                        l.setStyle({
+                            weight: 2,
+                            color: '#ec4899',
+                            fillOpacity: 0.9,
+                            fillColor: '#ec4899'
+                        });
+                        l.bringToFront();
+                        
+                        // Tooltip
+                        const countryName = feature.properties.name;
+                        l.bindToolTip(countryName, { sticky: true, className: 'map-tooltip' }).openTooltip();
+                    },
+                    mouseout: (e) => {
+                        geojsonLayer.resetStyle(e.target);
+                    },
+                    click: (e) => {
+                        const cca3 = feature.properties.iso_a3;
+                        // On doit mapper cca3 (3 lettres) vers cca2 (2 lettres) car notre app utilise cca2
+                        // On cherche dans globalCountriesData
+                        let foundCca2 = null;
+                        for (let code in globalCountriesData) {
+                            if (globalCountriesData[code].cca2 === feature.properties.iso_a2) {
+                                foundCca2 = code;
+                                break;
+                            }
+                        }
+
+                        if (foundCca2) {
+                            selectCountry('dest', foundCca2);
+                            document.getElementById('mapModal').classList.remove('show');
+                            showToast(`Destination: ${getCountryName(globalCountriesData[foundCca2])}`);
+                        } else {
+                            // Si pas trouvé par iso_a2, on essaye une correspondance par nom simple ou on ignore
+                            console.log("Country not mapped:", feature.properties.name);
+                        }
+                    }
+                });
+            }
+        }).addTo(leafletMap);
+
+        // Retirer le texte de chargement
+        const loader = document.querySelector('#mapContainer p');
+        if (loader) loader.remove();
+
+    } catch (e) {
+        console.error("Map Error:", e);
+        document.getElementById('mapContainer').innerHTML = `<p style="color:white; text-align:center; padding-top:20%;">Erreur lors du chargement des frontières mondiales. Veuillez réessayer.</p>`;
+    }
 }
 
 // --- NOTIFICATIONS & TOASTS ---

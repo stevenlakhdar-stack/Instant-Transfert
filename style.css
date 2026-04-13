@@ -892,8 +892,29 @@ p {
     transition: var(--transition); align-self: flex-end; margin-bottom: 4px;
 }
 .map-btn-circle:hover { background: var(--primary-color); color: white; border-color: var(--primary-color); }
-.map-country { transition: fill 0.2s; cursor: pointer; fill: #444; stroke: #222; stroke-width: 0.5px;}
-.map-country:hover { fill: var(--primary-color); opacity: 0.8; }
+
+/* Leaflet Overrides */
+.leaflet-container {
+    background: #0b0b0b !important;
+}
+.leaflet-bar a {
+    background-color: var(--secondary-bg) !important;
+    color: var(--text-main) !important;
+    border-bottom: 1px solid var(--card-border) !important;
+}
+.leaflet-bar a:hover {
+    background-color: var(--primary-color) !important;
+    color: white !important;
+}
+.leaflet-popup-content-wrapper {
+    background: var(--glass-bg) !important;
+    backdrop-filter: blur(10px);
+    color: var(--text-main) !important;
+    border: 1px solid var(--card-border);
+}
+.leaflet-popup-tip {
+    background: var(--card-border) !important;
+}
 
 /* ---- REFERRAL ---- */
 .referral-card { padding: 24px; margin-top: 20px; }

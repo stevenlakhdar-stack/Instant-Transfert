@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 </head>
 <body>
     <!-- Slideshow Background (Full Screen) -->
@@ -368,20 +370,18 @@
 
     <!-- Map Modal Overlay -->
     <div class="modal-overlay" id="mapModal">
-        <div class="glass-card modal-content" style="max-width: 800px; width: 95%;">
+        <div class="glass-card modal-content" style="max-width: 1000px; width: 95%; height: 80vh; padding: 20px;">
             <button class="close-modal" id="closeMapModal">✕</button>
-            <h2 data-i18n="mapTitle" style="text-align:center; margin-bottom: 16px;">Sélectionnez votre destination</h2>
-            <div id="mapContainer" style="width: 100%; height: 400px; background: rgba(255,255,255,0.05); border-radius: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-                <!-- Simplified SVG Map here -->
-                <p style="opacity: 0.6; font-style: italic;">Carte du monde interactive en cours de chargement...</p>
+            <h2 data-i18n="mapTitle" style="text-align:center; margin-bottom: 12px; font-size: 1.4rem;">Sélectionnez votre destination</h2>
+            <div id="mapContainer" style="width: 100%; height: calc(100% - 60px); background: #111; border-radius: 12px; overflow: hidden; position: relative; z-index: 10;">
+                <p style="position: absolute; top:50%; left:50%; transform: translate(-50%, -50%); color: white; opacity: 0.6;">Chargement de la carte HD...</p>
             </div>
-            <p style="text-align: center; margin-top: 16px; font-size: 0.9rem; opacity: 0.7;" data-i18n="mapHint">Cliquez sur un pays pour le choisir comme destination.</p>
         </div>
     </div>
 
     <!-- Notification Toast Container -->
     <div id="toastContainer" class="toast-container"></div>
 
-    <script src="app.js?v=7"></script>
+    <script src="app.js?v=8"></script>
 </body>
 </html>

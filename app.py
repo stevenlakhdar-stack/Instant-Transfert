@@ -37,6 +37,7 @@ try:
     html_content = html_content.replace('<link rel="stylesheet" href="style.css">', f"<style>{css_content}</style>")
     
     # Injecter le Javascript au lieu du système de fichier local
+    html_content = html_content.replace('<script src="app.js?v=8"></script>', f"<script>{js_content}</script>")
     html_content = html_content.replace('<script src="app.js?v=6"></script>', f"<script>{js_content}</script>")
     html_content = html_content.replace('<script src="app.js?v=5"></script>', f"<script>{js_content}</script>")
     html_content = html_content.replace('<script src="app.js?v=4"></script>', f"<script>{js_content}</script>")
