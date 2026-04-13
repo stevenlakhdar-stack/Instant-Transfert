@@ -67,7 +67,15 @@ const translations = {
         mapTitle: "Sélectionnez votre destination",
         mapHint: "Cliquez sur un pays pour le choisir comme destination.",
         notifSent: "Transfert vers {name} initié.",
-        notifRequest: "{name} vous a envoyé une demande de paiement."
+        notifRequest: "{name} vous a envoyé une demande de paiement.",
+        guide1: "Simuler",
+        guide1Desc: "Pays & Montant",
+        guide2: "Destinataire",
+        guide2Desc: "Favoris ou Manuel",
+        guide3: "Régler",
+        guide3Desc: "Paiement Sécurisé",
+        guide4: "Reçu",
+        guide4Desc: "PDF & Historique"
     },
     en: {
         pageTitle: "Instant Transfer - Global",
@@ -134,7 +142,15 @@ const translations = {
         mapTitle: "Select your destination",
         mapHint: "Click on a country to choose it as a destination.",
         notifSent: "Transfer to {name} initiated.",
-        notifRequest: "{name} sent you a payment request."
+        notifRequest: "{name} sent you a payment request.",
+        guide1: "Simulate",
+        guide1Desc: "Country & Amount",
+        guide2: "Recipient",
+        guide2Desc: "Favs or Manual",
+        guide3: "Pay",
+        guide3Desc: "Secure Payment",
+        guide4: "Receipt",
+        guide4Desc: "PDF & History"
     },
     es: {
         pageTitle: "Transferencia Instantánea - Global",
@@ -192,7 +208,24 @@ const translations = {
         modeRequest: "Solicitar",
         errorStep2: "Por favor, complete estos detalles correctamente.",
         shareLink: "Compartir enlace",
-        requestSent: "¡Solicitud enviada!"
+        requestSent: "¡Solicitud enviada!",
+        favTitle: "Contactos favoritos",
+        btnReceipt: "Descargar recibo",
+        referTitle: "Regala 10 CAD, recibe 10 CAD",
+        referDesc: "Invita a tus amigos y recibe un bono en su primera transferencia.",
+        btnCopy: "Copiar",
+        mapTitle: "Selecciona tu destino",
+        mapHint: "Haz clic en un país para elegirlo como destino.",
+        notifSent: "Transferencia a {name} iniciada.",
+        notifRequest: "{name} te envió una solicitud de pago.",
+        guide1: "Simular",
+        guide1Desc: "País y Monto",
+        guide2: "Destinatario",
+        guide2Desc: "Favs o Manual",
+        guide3: "Pagar",
+        guide3Desc: "Pago Seguro",
+        guide4: "Recibo",
+        guide4Desc: "PDF e Historial"
     }
 };
 
